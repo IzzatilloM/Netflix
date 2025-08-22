@@ -22,10 +22,11 @@ class ActorSerializer(serializers.ModelSerializer):
         if data.get('country').lower() == 'north korea' and data.get('gender').lower() == 'female':
             error = True
             errors = "Shimoliy Koreya ayol aktyorlari ushbu platformaga kirish huquqiga ega emas!"
-
-        if data.get('birthdate') < datetime.date.today() - datetime.timedelta(weeks=5200):
-            error = True
-            errors += "Ushbu davrda tug'ilgan tirik aktyorlar mavjud emas!"
+        birthdate = data.get('birthdate')
+        if birthdate is not None:
+            if birthdate < datetime.date.today() - datetime.timedelta(weeks=5200):
+                error = True
+                errors += "Ushbu davrda tug'ilgan tirik aktyorlar mavjud emas!"
         if errors:
             raise serializers.ValidationError(errors)
         return data
@@ -62,5 +63,14 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         model = Subscription
         fields = '__all__'
 
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = '__all__'
 
-
+class ReviewSafeSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(source='user.username', read_only=True)
+    movie = serializers.CharField(source='movie.name', read_only=True)
+    class Meta:
+        model = Review
+        fields = '__all__'
